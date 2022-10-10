@@ -1,4 +1,5 @@
 import sys
+from minizinc import Instance, Model, Solver
 
 if len(sys.argv) != 3:
     print("Wrong number of command line arguments!")
@@ -28,6 +29,9 @@ class Graph:
         self.agent_goal_positions = agent_goal_positions
 
     # Getters
+    def get_n_vertices(self):
+        return self.n_vertices
+
     def get_n_agents(self):
         return self.n_agents
 
@@ -84,6 +88,30 @@ def process_scenario(scenario_file,graph):
 def build_minizinc(graph_file,scenario_file):
     graph = process_graph(graph_file)
     process_scenario(scenario_file,graph)
+    mapf = Model("./proj.mzn")
+    gecode = Solver.lookup("gecode") # GECODE ??
+    MAX_TIMESTEP = 10
+    n_agents = graph.get_n_agents()
+    # SERÁ QUE DÁ PARA INICIALIZAR A INSTANCIA ANTES DO CICLO E A CADA ITERAÇÃO MUDAR SÓ O MAX_TIMETSTEP?
+    for ts in range(1,MAX_TIMESTEP):
+        instance = Instance(gecode, mapf)
+        instance["n_vertices"] = graph.get_n_vertices()
+        instance["n_agents"] = n_agents
+        instance["max_timestep"] = ts
+        initial_positions = [0 for x in range(n_agents)]
+        goal_positions = [0 for x in range(n_agents)]
+        initial_scenario_positions = graph.get_start_positions()
+        goal_scenario_positions = graph.get_goal_positions()
+        for pos in range(n_agents):
+            initial_positions[initial_scenario_positions[pos][0] - 1] = initial_scenario_positions[pos][1]
+            goal_positions[goal_scenario_positions[pos][0] - 1] = goal_scenario_positions[pos][1]
+        instance["initial_positions"] = initial_positions
+        instance["goal_positions"] = goal_positions
+        # INICIALIZAR ADJACENCIAS NA INSTANCE
+        #print(initial_positions)
+        #print(goal_positions)
+        #result = instance.solve()
+        #print(result["position_at_ts"])
     return graph
 
 def main():

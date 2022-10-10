@@ -21,6 +21,7 @@ class Graph:
         self.n_vertices = n_vertices
         self.n_edges = n_edges
         self.edges = edges
+        self.build_adj_matrix()
 
     # Method for setting up a specific given scenario for the graph
     def set_scenario(self,n_agents,agent_start_positions,agent_goal_positions):
@@ -40,6 +41,17 @@ class Graph:
 
     def get_goal_positions(self):
         return self.agent_goal_positions
+
+    def get_adj_matrix(self):
+        return self.adj_matrix
+
+    # Method to return Adjacency Matrix for minizinc initialization
+    def build_adj_matrix(self):
+        adj_matrix = [[0] * self.n_vertices for x in range(self.n_vertices)]
+        for edge in self.edges:
+            adj_matrix[edge[0]-1][edge[1]-1] = 1
+            adj_matrix[edge[1]-1][edge[0]-1] = 1
+        self.adj_matrix = adj_matrix
 
     # Method to print adjacency matrix for graph
     def __str__(self):
@@ -90,14 +102,14 @@ def build_minizinc(graph_file,scenario_file):
     process_scenario(scenario_file,graph)
     mapf = Model("./proj.mzn")
     gecode = Solver.lookup("gecode") # GECODE ??
-    MAX_TIMESTEP = 10
+    MAX_TIMESTEP = 1
     n_agents = graph.get_n_agents()
     # SERÁ QUE DÁ PARA INICIALIZAR A INSTANCIA ANTES DO CICLO E A CADA ITERAÇÃO MUDAR SÓ O MAX_TIMETSTEP?
-    for ts in range(1,MAX_TIMESTEP):
+    for ts in range(0,MAX_TIMESTEP):
         instance = Instance(gecode, mapf)
-        instance["n_vertices"] = graph.get_n_vertices()
-        instance["n_agents"] = n_agents
-        instance["max_timestep"] = ts
+        instance["n_vertices"] = 4
+        instance["n_agents"] = 1
+        instance["max_timestep"] = 2
         initial_positions = [0 for x in range(n_agents)]
         goal_positions = [0 for x in range(n_agents)]
         initial_scenario_positions = graph.get_start_positions()
@@ -105,13 +117,11 @@ def build_minizinc(graph_file,scenario_file):
         for pos in range(n_agents):
             initial_positions[initial_scenario_positions[pos][0] - 1] = initial_scenario_positions[pos][1]
             goal_positions[goal_scenario_positions[pos][0] - 1] = goal_scenario_positions[pos][1]
-        instance["initial_positions"] = initial_positions
-        instance["goal_positions"] = goal_positions
-        # INICIALIZAR ADJACENCIAS NA INSTANCE
-        #print(initial_positions)
-        #print(goal_positions)
-        #result = instance.solve()
-        #print(result["position_at_ts"])
+        instance["initial_positions"] = [1]
+        instance["goal_positions"] = [4]
+        instance["edges"] = [[1,1,1,1], [1,1,1,1], [1,1,1,1], [1,1,1,1]]
+        result = instance.solve()
+        print(result)
     return graph
 
 def main():

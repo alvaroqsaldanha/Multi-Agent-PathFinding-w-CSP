@@ -3,9 +3,9 @@
 int: max_timestep;
 int: n_vertices;
 int: n_agents;
-array[1..n_agents] of var 1..n_vertices: goal_positions;
-array[1..n_agents] of var 1..n_vertices: initial_positions;
-array[1..n_vertices,1..n_vertices] of var 0..1: edges;
+array[1..n_agents] of int: goal_positions;
+array[1..n_agents] of int: initial_positions;
+array[1..n_vertices,1..n_vertices] of int: edges;
 
 % Decision Variables
 
@@ -47,4 +47,6 @@ constraint forall(ts in 2..max_timestep, agent in 1..n_agents)(
   );
   
 solve satisfy;
+
+
  

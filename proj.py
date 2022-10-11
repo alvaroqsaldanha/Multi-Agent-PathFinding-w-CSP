@@ -102,14 +102,14 @@ def build_minizinc(graph_file,scenario_file):
     process_scenario(scenario_file,graph)
     mapf = Model("./proj.mzn")
     gecode = Solver.lookup("gecode") # GECODE ??
-    MAX_TIMESTEP = 1
+    MAX_TIMESTEP = 30
     n_agents = graph.get_n_agents()
     # SERÁ QUE DÁ PARA INICIALIZAR A INSTANCIA ANTES DO CICLO E A CADA ITERAÇÃO MUDAR SÓ O MAX_TIMETSTEP?
     for ts in range(0,MAX_TIMESTEP):
         instance = Instance(gecode, mapf)
-        instance["n_vertices"] = 4
-        instance["n_agents"] = 1
-        instance["max_timestep"] = 2
+        instance["n_vertices"] = graph.get_n_vertices()
+        instance["n_agents"] = n_agents
+        instance["max_timestep"] = ts
         initial_positions = [0 for x in range(n_agents)]
         goal_positions = [0 for x in range(n_agents)]
         initial_scenario_positions = graph.get_start_positions()
@@ -117,16 +117,15 @@ def build_minizinc(graph_file,scenario_file):
         for pos in range(n_agents):
             initial_positions[initial_scenario_positions[pos][0] - 1] = initial_scenario_positions[pos][1]
             goal_positions[goal_scenario_positions[pos][0] - 1] = goal_scenario_positions[pos][1]
-        instance["initial_positions"] = [1]
-        instance["goal_positions"] = [4]
-        instance["edges"] = [[1,1,1,1], [1,1,1,1], [1,1,1,1], [1,1,1,1]]
+        instance["initial_positions"] = initial_positions
+        instance["goal_positions"] = goal_positions
+        instance["edges"] = graph.get_adj_matrix()
         result = instance.solve()
         print(result)
     return graph
 
 def main():
     graph = build_minizinc(graph_file,scenario_file)
-    print(graph)
 
 if __name__ == "__main__":
     main()

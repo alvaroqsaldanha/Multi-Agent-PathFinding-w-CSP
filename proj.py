@@ -97,6 +97,13 @@ def process_scenario(scenario_file,graph):
     graph.set_scenario(n_agents,agent_start_positions,agent_goal_positions)
     scenario_file.close()
 
+def build_solution(solution):
+    for ts in range(0,len(solution)):
+        line = "i=" + str(ts) + "   "
+        for agent in range(len(solution[ts])):
+            line += str(agent+1) + ":" + str(solution[ts][agent]) + " "
+        print(line)
+
 def build_minizinc(graph_file,scenario_file):
     graph = process_graph(graph_file)
     process_scenario(scenario_file,graph)
@@ -105,7 +112,7 @@ def build_minizinc(graph_file,scenario_file):
     MAX_TIMESTEP = 30
     n_agents = graph.get_n_agents()
     # SERÁ QUE DÁ PARA INICIALIZAR A INSTANCIA ANTES DO CICLO E A CADA ITERAÇÃO MUDAR SÓ O MAX_TIMETSTEP?
-    for ts in range(0,MAX_TIMESTEP):
+    for ts in range(1,MAX_TIMESTEP+1):
         instance = Instance(gecode, mapf)
         instance["n_vertices"] = graph.get_n_vertices()
         instance["n_agents"] = n_agents
@@ -121,11 +128,17 @@ def build_minizinc(graph_file,scenario_file):
         instance["goal_positions"] = goal_positions
         instance["edges"] = graph.get_adj_matrix()
         result = instance.solve()
-        print(result)
+        if result.solution != None:
+            print(result["position_at_ts"])
+            print("\nSolution found for timestep " + str(ts) + ":\n")
+            build_solution(result["position_at_ts"])
+            break
+        else:
+            print("No solution found for timestep " + str(ts) + ".")
     return graph
 
 def main():
-    graph = build_minizinc(graph_file,scenario_file)
+    build_minizinc(graph_file,scenario_file)
 
 if __name__ == "__main__":
     main()

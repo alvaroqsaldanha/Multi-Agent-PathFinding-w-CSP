@@ -1,18 +1,9 @@
+# Search And Planning Project 2022/2023
+# Alvaro Saldanha, 92416
+# Vasco Cabral, 92568
+
 import sys
 from minizinc import Instance, Model, Solver
-
-if len(sys.argv) != 3:
-    print("Wrong number of command line arguments!")
-    exit()
-
-graph_file_name = sys.argv[1]
-scenario_file_name = sys.argv[2]
-
-try:
-    graph_file = open(graph_file_name,"r")
-    scenario_file = open(scenario_file_name,"r")
-except FileNotFoundError:
-    print("Error processing input file(s).")
 
 # Class for graph implementation
 class Graph:
@@ -97,6 +88,7 @@ def process_scenario(scenario_file,graph):
     graph.set_scenario(n_agents,agent_start_positions,agent_goal_positions)
     scenario_file.close()
 
+# Function to output found solution to text file
 def build_solution(solution):
     for ts in range(0,len(solution)):
         line = "i=" + str(ts) + "   "
@@ -108,10 +100,10 @@ def build_minizinc(graph_file,scenario_file):
     graph = process_graph(graph_file)
     process_scenario(scenario_file,graph)
     mapf = Model("./proj.mzn")
-    gecode = Solver.lookup("gecode") # GECODE ??
+    gecode = Solver.lookup("gecode")
     MAX_TIMESTEP = 30
     n_agents = graph.get_n_agents()
-    # SERÁ QUE DÁ PARA INICIALIZAR A INSTANCIA ANTES DO CICLO E A CADA ITERAÇÃO MUDAR SÓ O MAX_TIMETSTEP?
+    # SERÁ QUE DÁ PARA INICIALIZAR A INSTANCIA ANTES DO CICLO E A CADA ITERAÇÃO MUDAR SÓ O MAX_TIMETSTEP? VER FUNÇÃOI BRANCH!!!
     for ts in range(1,MAX_TIMESTEP+1):
         instance = Instance(gecode, mapf)
         instance["n_vertices"] = graph.get_n_vertices()
@@ -134,10 +126,21 @@ def build_minizinc(graph_file,scenario_file):
             build_solution(result["position_at_ts"])
             break
         else:
-            print("No solution found for timestep " + str(ts) + ".")
+            print("No solution found for timestep " + str(ts-1) + ".")
     return graph
 
 def main():
+    if len(sys.argv) != 3:
+        print("Wrong number of command line arguments!")
+        exit()
+    graph_file_name = sys.argv[1]
+    scenario_file_name = sys.argv[2]
+
+    try:
+        graph_file = open(graph_file_name,"r")
+        scenario_file = open(scenario_file_name,"r")
+    except FileNotFoundError:
+        print("Error processing input file(s).")
     build_minizinc(graph_file,scenario_file)
 
 if __name__ == "__main__":

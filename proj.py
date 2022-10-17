@@ -103,7 +103,7 @@ def build_minizinc(graph_file,scenario_file):
     gecode = Solver.lookup("gecode")
     MAX_TIMESTEP = 30
     n_agents = graph.get_n_agents()
-    ts = 1
+    ts = 2
     found_solution = None
     while ts < MAX_TIMESTEP + 1:
         instance = Instance(gecode, mapf)
@@ -117,6 +117,9 @@ def build_minizinc(graph_file,scenario_file):
         for pos in range(n_agents):
             initial_positions[initial_scenario_positions[pos][0] - 1] = initial_scenario_positions[pos][1]
             goal_positions[goal_scenario_positions[pos][0] - 1] = goal_scenario_positions[pos][1]
+        if initial_positions == goal_positions:
+            build_solution([goal_positions])
+            break
         instance["initial_positions"] = initial_positions
         instance["goal_positions"] = goal_positions
         instance["edges"] = graph.get_adj_matrix()
@@ -125,6 +128,9 @@ def build_minizinc(graph_file,scenario_file):
             found_solution = result["position_at_ts"]
             #print("\nSolution found for timestep " + str(ts) + ".\n")
             ts -= 1
+            if ts == 1:
+                build_solution(found_solution)
+                break
             continue
         elif result.solution == None and found_solution != None:
             build_solution(found_solution)
@@ -155,4 +161,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

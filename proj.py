@@ -103,8 +103,9 @@ def build_minizinc(graph_file,scenario_file):
     gecode = Solver.lookup("gecode")
     MAX_TIMESTEP = 30
     n_agents = graph.get_n_agents()
-    # SERÁ QUE DÁ PARA INICIALIZAR A INSTANCIA ANTES DO CICLO E A CADA ITERAÇÃO MUDAR SÓ O MAX_TIMETSTEP? VER FUNÇÃOI BRANCH!!!
-    for ts in range(1,MAX_TIMESTEP+1):
+    ts = 1
+    found_solution = None
+    while ts < MAX_TIMESTEP + 1:
         instance = Instance(gecode, mapf)
         instance["n_vertices"] = graph.get_n_vertices()
         instance["n_agents"] = n_agents
@@ -120,13 +121,22 @@ def build_minizinc(graph_file,scenario_file):
         instance["goal_positions"] = goal_positions
         instance["edges"] = graph.get_adj_matrix()
         result = instance.solve()
-        if result.solution != None:
-            print(result["position_at_ts"])
-            print("\nSolution found for timestep " + str(ts) + ":\n")
+        if result.solution != None and found_solution == None:
+            found_solution = result["position_at_ts"]
+            #print("\nSolution found for timestep " + str(ts) + ".\n")
+            ts -= 1
+            continue
+        elif result.solution == None and found_solution != None:
+            build_solution(found_solution)
+            return
+        elif result.solution != None:
+            #print("\nSolution found for timestep " + str(ts) + ".\n")
             build_solution(result["position_at_ts"])
-            break
+            return
         else:
-            print("No solution found for timestep " + str(ts-1) + ".")
+            #print("No solution found for timestep " + str(ts) + ".")
+            ts += 2
+            continue
     return graph
 
 def main():

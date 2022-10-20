@@ -46,7 +46,7 @@ constraint forall(ts in 2..max_timestep, agent in 1..n_agents)(
   endif  
   );
   
-solve satisfy;
+solve :: int_search([position_at_ts[ts,a] | ts in 1..max_timestep, a in 1..n_agents], first_fail, indomain_random, complete) satisfy;
 
 
  

@@ -45,8 +45,8 @@ constraint forall(ts in 2..max_timestep, agent in 1..n_agents)(
     edges[position_at_ts[ts-1,agent],position_at_ts[ts,agent]] = 1 
   endif  
   );
-  
-solve :: int_search([position_at_ts[ts,a] | ts in 1..max_timestep, a in 1..n_agents], first_fail, indomain_random, complete) satisfy;
 
+solve satisfy;
 
- 
+% Attempted optimization described in proposed solution summary.
+%solve :: int_search([position_at_ts[ts,a] | ts in 1..max_timestep, a in 1..n_agents], first_fail, indomain_random, complete) satisfy;

@@ -100,13 +100,13 @@ def build_minizinc(graph_file,scenario_file):
     graph = process_graph(graph_file)
     process_scenario(scenario_file,graph)
     mapf = Model("./proj.mzn")
-    gecode = Solver.lookup("gecode")
-    MAX_TIMESTEP = 30
+    chuffed = Solver.lookup("chuffed")
+    MAX_TIMESTEP = 60
     n_agents = graph.get_n_agents()
     ts = 2
     found_solution = None
     while ts < MAX_TIMESTEP + 1:
-        instance = Instance(gecode, mapf)
+        instance = Instance(chuffed, mapf)
         instance["n_vertices"] = graph.get_n_vertices()
         instance["n_agents"] = n_agents
         instance["max_timestep"] = ts

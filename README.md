@@ -5,7 +5,7 @@ the paths, given a graph and a scenario, in which potentially multiple agents in
 goal nodes, minimizing the number of timesteps needed for them to do so according to a set of constraints and
 rules.
 
-The implementation, developed with Python and Minizinc, starts by parsing the graph and scenario input files
+The implementation, developed with Python and [Minizinc](https://www.minizinc.org/), starts by parsing the graph and scenario input files
 using a new graph object to store their information. Following this initialization, the essential logic behind the
 implementation rests on continuously increasing the maximum time step by 2 (with the goal of skipping time
 steps, potentially removing unnecessary processing) and, on each iteration, calling minizinc with the respective
